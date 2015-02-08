@@ -39,7 +39,7 @@ void viewVolume(){
    glMatrixMode(GL_MODELVIEW);
    glLoadIdentity();
 
-   eye.x=1.0; eye.y=4.0; eye.z=0.0;
+   eye.x=4.0; eye.y=3.0; eye.z=5.0;
    view.x=0.0; view.y=0.0; view.z=0.0;
    up.x=0.0; up.y=1.0; up.z=0.0;
 
@@ -102,9 +102,9 @@ void lights(){
 
 void material(){
    float mat_ambient[]={0,0,0,1};
-   float mat_diffuse[]={.9,.9,.1,1};
+   float mat_diffuse[]={.9,.2,.2,1};
    float mat_specular[] = {1,1,1,1};
-   float mat_shininess[]={2.0};
+   float mat_shininess[]={2.5};
 
    glMaterialfv(GL_FRONT, GL_AMBIENT, mat_ambient);
    glMaterialfv(GL_FRONT, GL_DIFFUSE, mat_diffuse);
