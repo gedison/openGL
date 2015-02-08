@@ -3,7 +3,6 @@
 #include <iostream>
 #include <GL/gl.h>
 #include <GL/glut.h>
-#include <unistd.h>
 
 #include <iostream>
 #include <vector>
@@ -66,7 +65,7 @@ void draw(){
 }
 
 void update(){
-   usleep(1000);
+   //usleep(1000);
    glTranslatef(.5,0,.5);
    glRotatef(1.0,0.0,1.0,0.0);
    glTranslatef(-.5,0,-.5);
