@@ -106,7 +106,7 @@ void material(){
    glMaterialfv(GL_FRONT, GL_SHININESS, mat_shininess);
 }
 
-GLuint mybuf=1, mybuf2=2;
+GLuint mybuf[]={1,2};
 void initOGL(int argc, char **argv){
    glutInit(&argc, argv);
    glutInitDisplayMode(GLUT_RGBA|GLUT_DEPTH|GLUT_DOUBLE);
@@ -119,11 +119,11 @@ void initOGL(int argc, char **argv){
    lights();
    material();
    
-   glBindBuffer(GL_ARRAY_BUFFER,mybuf);
+   glBindBuffer(GL_ARRAY_BUFFER, mybuf[0]);
    glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat)*verticeSize, myVertices, GL_STATIC_DRAW);
    glVertexPointer(3, GL_FLOAT, 3*sizeof(GLfloat), NULL+0);
 
-   glBindBuffer(GL_ARRAY_BUFFER, mybuf2);
+   glBindBuffer(GL_ARRAY_BUFFER, mybuf[1]);
    glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat)*normalSize, myNormals, GL_STATIC_DRAW);
    glNormalPointer(GL_FLOAT, 3*sizeof(GLfloat), NULL+0);
 
@@ -160,8 +160,7 @@ void mouseMotion(int x, int y){
 void keyboard(unsigned char key, int x, int y){
    switch(key){
       case 'q': 
-        glDeleteBuffers(1,&mybuf);
-        glDeleteBuffers(1,&mybuf2);
+        glDeleteBuffers(2, mybuf);
         exit(1);
       default: break;  
    }
