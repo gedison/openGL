@@ -41,7 +41,7 @@ void viewVolume(){
    glMatrixMode(GL_MODELVIEW);
    glLoadIdentity();
 
-   eye.x=4.0; eye.y=3.0; eye.z=5.0;
+   eye.x=0.0; eye.y=1.0; eye.z=7.0;
    view.x=0.0; view.y=0.0; view.z=0.0;
    up.x=0.0; up.y=1.0; up.z=0.0;
 
@@ -70,30 +70,65 @@ void update(){
 }
 
 void lights(){
-   float light0_ambient[]={0,0,0,0};
-   float light0_diffuse[]={1,1,1,0};
-   float light0_specular[]={1,1,1,0};
-   float light0_position[]={1.5,2,2,1};
-   float light0_direction[]={-1.5,-2,-2,1};
+   float key_ambient[]={0,0,0,0};
+   float key_diffuse[]={1,1,1,0};
+   float key_specular[]={1,1,1,0};
+   float key_position[]={-3,5,6,1};
+   float key_direction[]={3,-5,-6,1};
+   
+   float fill_ambient[]={0,0,0,0};
+   float fill_diffuse[]={.2,.2,.2,0};
+   float fill_specular[]={.2,.2,.2,0};
+   float fill_position[]={2,4.5,7.5,1};
+   float fill_direction[]={-2,-4.5,-7.5,1};
+   
+   float back_ambient[]={0,0,0,0};
+   float back_diffuse[]={.5,.5,.5,0};
+   float back_specular[]={.5,.5,.5,0};
+   float back_position[]={0,5,-6.5,1};
+   float back_direction[]={-3,-5,-2,1};
 
-   glLightModelfv(GL_LIGHT_MODEL_AMBIENT,light0_ambient);
+   glLightModelfv(GL_LIGHT_MODEL_AMBIENT,key_ambient);
    glLightModeli(GL_LIGHT_MODEL_LOCAL_VIEWER,1);
    
-   glLightfv(GL_LIGHT0,GL_AMBIENT,light0_ambient);
-   glLightfv(GL_LIGHT0,GL_DIFFUSE,light0_diffuse);
-   glLightfv(GL_LIGHT0,GL_SPECULAR,light0_specular);
-
+   glLightfv(GL_LIGHT0,GL_AMBIENT,key_ambient);
+   glLightfv(GL_LIGHT0,GL_DIFFUSE,key_diffuse);
+   glLightfv(GL_LIGHT0,GL_SPECULAR,key_specular);
    glLightf(GL_LIGHT0,GL_SPOT_EXPONENT, 1.0);
    glLightf(GL_LIGHT0,GL_SPOT_CUTOFF, 180.0);
    glLightf(GL_LIGHT0,GL_CONSTANT_ATTENUATION, .5);
    glLightf(GL_LIGHT0,GL_LINEAR_ATTENUATION, .1);
    glLightf(GL_LIGHT0,GL_QUADRATIC_ATTENUATION, .01);
-
-   glLightfv(GL_LIGHT0,GL_POSITION,light0_position);
-   glLightfv(GL_LIGHT0,GL_SPOT_DIRECTION,light0_direction);
+   glLightfv(GL_LIGHT0,GL_POSITION,key_position);
+   glLightfv(GL_LIGHT0,GL_SPOT_DIRECTION,key_direction);
+   
+   glLightfv(GL_LIGHT1,GL_AMBIENT,fill_ambient);
+   glLightfv(GL_LIGHT1,GL_DIFFUSE,fill_diffuse);
+   glLightfv(GL_LIGHT1,GL_SPECULAR,fill_specular);
+   glLightf(GL_LIGHT1,GL_SPOT_EXPONENT, 1.0);
+   glLightf(GL_LIGHT1,GL_SPOT_CUTOFF, 180.0);
+   glLightf(GL_LIGHT1,GL_CONSTANT_ATTENUATION, .5);
+   glLightf(GL_LIGHT1,GL_LINEAR_ATTENUATION, .1);
+   glLightf(GL_LIGHT1,GL_QUADRATIC_ATTENUATION, .01);
+   glLightfv(GL_LIGHT1,GL_POSITION,fill_position);
+   glLightfv(GL_LIGHT1,GL_SPOT_DIRECTION,fill_direction);
+   
+   glLightfv(GL_LIGHT2,GL_AMBIENT,back_ambient);
+   glLightfv(GL_LIGHT2,GL_DIFFUSE,back_diffuse);
+   glLightfv(GL_LIGHT2,GL_SPECULAR,back_specular);
+   glLightf(GL_LIGHT2,GL_SPOT_EXPONENT, 1.0);
+   glLightf(GL_LIGHT2,GL_SPOT_CUTOFF, 180.0);
+   glLightf(GL_LIGHT2,GL_CONSTANT_ATTENUATION, .5);
+   glLightf(GL_LIGHT2,GL_LINEAR_ATTENUATION, .1);
+   glLightf(GL_LIGHT2,GL_QUADRATIC_ATTENUATION, .01);
+   glLightfv(GL_LIGHT2,GL_POSITION,back_position);
+   glLightfv(GL_LIGHT2,GL_SPOT_DIRECTION,back_direction);
 
    glEnable(GL_LIGHTING);
    glEnable(GL_LIGHT0);
+   glEnable(GL_LIGHT1);
+   glEnable(GL_LIGHT2);
+   
 }
 
 void material(){
