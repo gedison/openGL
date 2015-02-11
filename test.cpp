@@ -19,6 +19,8 @@ GLfloat *myVertices=NULL;
 GLfloat *myNormals=NULL;
 int verticeSize=0, normalSize=0, sides=0;
 
+GLfloat VBObuff[1253340];
+
 struct point{
    float x;
    float y;
@@ -106,7 +108,7 @@ void material(){
    glMaterialfv(GL_FRONT, GL_SHININESS, mat_shininess);
 }
 
-GLuint mybuf[]={1,2};
+GLuint mybuf = 1;
 void initOGL(int argc, char **argv){
    glutInit(&argc, argv);
    glutInitDisplayMode(GLUT_RGBA|GLUT_DEPTH|GLUT_DOUBLE);
@@ -119,14 +121,12 @@ void initOGL(int argc, char **argv){
    lights();
    material();
    
-   glBindBuffer(GL_ARRAY_BUFFER, mybuf[0]);
-   glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat)*verticeSize, myVertices, GL_STATIC_DRAW);
+   glBindBuffer(GL_ARRAY_BUFFER, mybuf);
+   glBufferData(GL_ARRAY_BUFFER, sizeof(VBObuff), VBObuff, GL_STATIC_DRAW);
    glVertexPointer(3, GL_FLOAT, 3*sizeof(GLfloat), NULL+0);
 
-   glBindBuffer(GL_ARRAY_BUFFER, mybuf[1]);
-   glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat)*normalSize, myNormals, GL_STATIC_DRAW);
-   glNormalPointer(GL_FLOAT, 3*sizeof(GLfloat), NULL+0);
-
+   glNormalPointer(GL_FLOAT, 3*sizeof(GLfloat), (GLvoid*)(NULL+626670*sizeof(GLfloat)));
+   
    glEnableClientState(GL_VERTEX_ARRAY);
    glEnableClientState(GL_NORMAL_ARRAY);
 }
@@ -160,7 +160,8 @@ void mouseMotion(int x, int y){
 void keyboard(unsigned char key, int x, int y){
    switch(key){
       case 'q': 
-        glDeleteBuffers(2, mybuf);
+        //glDeleteBuffers(2, mybuf);
+        glDeleteBuffers(1, &mybuf);
         exit(1);
       default: break;  
    }
@@ -284,12 +285,25 @@ int main(int argc, char **argv){
       return 0;
    }
 
-   myVertices = new GLfloat[vertices2.size()*3] ;
+   for(unsigned int i = 0; i<vertices2.size(); i++){
+      VBObuff[(i*3)]=vertices2[i].x;
+      VBObuff[(i*3)+1]=vertices2[i].y;
+      VBObuff[(i*3)+2]=vertices2[i].z;
+      verticeSize+=3;
+   }
+   for(unsigned int i = 0; i<normals2.size(); i++){
+      VBObuff[verticeSize+(i*3)]=normals2[i].x;
+      VBObuff[verticeSize+(i*3)+1]=normals2[i].y;
+      VBObuff[verticeSize+(i*3)+2]=normals2[i].z;
+      normalSize+=3;
+   }
+   
+   /*myVertices = new GLfloat[vertices2.size()*3] ;
    for(unsigned int i = 0; i<vertices2.size(); i++){
       myVertices[(i*3)]=vertices2[i].x;
       myVertices[(i*3)+1]=vertices2[i].y;
       myVertices[(i*3)+2]=vertices2[i].z;
-      verticeSize+=3;
+      //verticeSize+=3;
    }
 
    myNormals = new GLfloat[normals2.size()*3];
@@ -297,9 +311,10 @@ int main(int argc, char **argv){
       myNormals[(i*3)]=normals2[i].x;
       myNormals[(i*3)+1]=normals2[i].y;
       myNormals[(i*3)+2]=normals2[i].z;
-      normalSize+=3;
-   }
+      //normalSize+=3;
+   }*/
    sides=verticeSize/3;
+
 /*
   normalSize=0;verticeSize=0;
   myVertices=new GLfloat[12];
