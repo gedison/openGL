@@ -364,7 +364,7 @@ int main(int argc, char **argv){
    glutMotionFunc(mouseMotion);
 
    glutDisplayFunc(draw);
-   glutIdleFunc(update);
+//   glutIdleFunc(update);
    glutMainLoop();
    return 0;
 }
