@@ -1,10 +1,16 @@
 #define GL_GLEXT_PROTOTYPES
 #include <stdio.h>
-#include <iostream>
+
+#ifdef __APPLE__
+#include <OpenGL/gl.h>
+#include <GLUT/glut.h>
+#else
 #include <GL/gl.h>
 #include <GL/glut.h>
-#include <unistd.h>
+#endif
 
+#include <fcntl.h>
+#include <unistd.h>
 #include <iostream>
 #include <vector>
 #include <fstream>
@@ -27,8 +33,10 @@ struct point{
    float z;
 };
 
+float eye[3]={0.0,1.0,7.0};
+
 void viewVolume(){
-   struct point eye;
+   //struct point eye;
    struct point view;
    struct point up;
    
@@ -41,11 +49,11 @@ void viewVolume(){
    glMatrixMode(GL_MODELVIEW);
    glLoadIdentity();
 
-   eye.x=0.0; eye.y=1.0; eye.z=7.0;
+   //eye.x=0.0; eye.y=1.0; eye.z=7.0;
    view.x=0.0; view.y=0.0; view.z=0.0;
    up.x=0.0; up.y=1.0; up.z=0.0;
 
-   gluLookAt(eye.x,eye.y,eye.z,view.x,view.y,view.z,up.x,up.y,up.z);
+   gluLookAt(eye[0],eye[1],eye[2],view.x,view.y,view.z,up.x,up.y,up.z);
 }
 
 void draw(){
@@ -68,6 +76,8 @@ void update(){
    glTranslatef(-.5,0,-.5);
    glutPostRedisplay();
 }
+
+float light_position[3]={-3,5,-6};
 
 void lights(){
    float key_ambient[]={0,0,0,0};
@@ -310,6 +320,55 @@ bool loadObj(string filename,
    return 1;
 }
 
+char *read_shader_program(char *filename) 
+{
+   FILE *fp;
+   char *content = NULL;
+   int fd, count;
+   fd = open(filename,O_RDONLY);
+   count = lseek(fd,0,SEEK_END);
+   close(fd);
+   content = (char *)calloc(1,(count+1));
+   fp = fopen(filename,"r");
+   count = fread(content,sizeof(char),count,fp);
+   content[count] = '\0';
+   fclose(fp);
+   return content;
+}
+
+unsigned int set_shaders(){
+   GLint vertCompiled, fragCompiled;
+   char *vs, *fs;
+   GLuint v, f, p;
+
+   v = glCreateShader(GL_VERTEX_SHADER);
+   f = glCreateShader(GL_FRAGMENT_SHADER);
+   vs = read_shader_program("phong.vert");
+   fs = read_shader_program("phong.frag");
+   glShaderSource(v,1,(const char **)&vs,NULL);
+   glShaderSource(f,1,(const char **)&fs,NULL);
+   free(vs);
+   free(fs); 
+   glCompileShader(v);
+   glCompileShader(f);
+   p = glCreateProgram();
+   glAttachShader(p,f);
+   glAttachShader(p,v);
+   glLinkProgram(p);
+   glUseProgram(p);
+   return(p);
+}
+
+void set_uniform_parameters(unsigned int p)
+{
+   int location;
+   location = glGetUniformLocation(p,"eye_position");
+   glUniform3fv(location,1,eye);
+   location = glGetUniformLocation(p,"light_position_1");
+   glUniform3fv(location,1,light_position);
+}
+
+
 int main(int argc, char **argv){
    string filename= "bunny.obj";
    vector <vec3> vertices2;
@@ -331,34 +390,14 @@ int main(int argc, char **argv){
       VBObuff[verticeSize+(i*3)+1]=normals2[i].y;
       VBObuff[verticeSize+(i*3)+2]=normals2[i].z;
       normalSize+=3;
-   }
-   
-   /*myVertices = new GLfloat[vertices2.size()*3] ;
-   for(unsigned int i = 0; i<vertices2.size(); i++){
-      myVertices[(i*3)]=vertices2[i].x;
-      myVertices[(i*3)+1]=vertices2[i].y;
-      myVertices[(i*3)+2]=vertices2[i].z;
-      //verticeSize+=3;
-   }
-
-   myNormals = new GLfloat[normals2.size()*3];
-   for(unsigned int i = 0; i<normals2.size(); i++){
-      myNormals[(i*3)]=normals2[i].x;
-      myNormals[(i*3)+1]=normals2[i].y;
-      myNormals[(i*3)+2]=normals2[i].z;
-      //normalSize+=3;
-   }*/
-   sides=verticeSize/3;
-
-/*
-  normalSize=0;verticeSize=0;
-  myVertices=new GLfloat[12];
-  for(int i=0; i<12; i++){verticeSize++;myVertices[i]=vertices[i];}
-  myNormals=new GLfloat[12];
-  for(int i=0; i<12; i++){normalSize++;myNormals[i]=normals[i];}
-*/
+   }sides=verticeSize/3;
 
    initOGL(argc, argv);
+
+   unsigned int p;
+   p = set_shaders();
+   set_uniform_parameters(p);
+
    glutKeyboardFunc(keyboard);
    glutMouseFunc(mouse);
    glutMotionFunc(mouseMotion);
