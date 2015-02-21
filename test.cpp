@@ -14,8 +14,12 @@
 #include <iostream>
 #include <vector>
 #include <fstream>
+#include <math.h>
 
 using namespace std;
+
+#define VPASSES 10
+#define JITTER 0.01
 
 float cameraAngleX=0, cameraAngleY=0, cameraDistance=0;
 bool mouseLeftDown=false, mouseRightDown=false, mouseMiddleDown=false;
@@ -35,31 +39,71 @@ struct point{
 
 float eye[3]={0.0,1.0,7.0};
 
+double genRand(){
+   return (((double)(random()+1))/2147483649.);
+}
+
+struct point cross(const struct point& u, const struct point& v){
+   struct point w;
+   w.x = u.y*v.z - u.z*v.y;
+   w.y = -(u.x*v.z - u.z*v.x);
+   w.z = u.x*v.y - u.y*v.x;
+   return(w);
+}
+
+struct point unit_length(const struct point& u){
+   double length;
+   struct point v;
+   length = sqrt(u.x*u.x+u.y*u.y+u.z*u.z);
+   v.x = u.x/length;
+   v.y = u.y/length;
+   v.z = u.z/length;
+   return(v);
+}
+
 void viewVolume(){
-   //struct point eye;
-   struct point view;
-   struct point up;
-   
    glEnable(GL_DEPTH_TEST);
    
    glMatrixMode(GL_PROJECTION);
    glLoadIdentity();
    gluPerspective(60.0, 1.0, 0.01, 1000.0);
+}
 
+void jitter_view(){
    glMatrixMode(GL_MODELVIEW);
    glLoadIdentity();
 
-   //eye.x=0.0; eye.y=1.0; eye.z=7.0;
-   view.x=0.0; view.y=0.0; view.z=0.0;
+   struct point jEye, view, up, vdir, utemp, vtemp;
+   jEye.x = eye[0]; jEye.y = eye[1]; jEye.z = eye[2];
+   view.x=JITTER*genRand(); view.y=JITTER*genRand(); view.z=JITTER*genRand();
    up.x=0.0; up.y=1.0; up.z=0.0;
+   vdir.x = view.x - jEye.x; vdir.y = view.y - jEye.y; vdir.z = view.z - jEye.z;
+   //up vector orthogonal to vdir, in plane of vdir and (0,1,0)
+   vtemp = cross(vdir, up);
+   utemp = cross(vtemp, vdir);
+   up = unit_length(utemp);
 
-   gluLookAt(eye[0],eye[1],eye[2],view.x,view.y,view.z,up.x,up.y,up.z);
+   gluLookAt(jEye.x,jEye.y,jEye.z,view.x,view.y,view.z,up.x,up.y,up.z);
 }
-
+/*
 void draw(){
    glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
    glDrawArrays(GL_TRIANGLES,0,sides);
    glutSwapBuffers();
+}
+*/
+
+void draw(){
+   int view_pass;
+   glClear(GL_ACCUM_BUFFER_BIT);
+   for(view_pass=0; view_pass < VPASSES; view_pass++){
+      jitter_view();
+      glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
+      glDrawArrays(GL_TRIANGLES,0,sides);
+      glFlush();
+      glAccum(GL_ACCUM, 1.0/(float)(VPASSES));
+   }
+   glAccum(GL_RETURN, 1.0);
 }
 
 void update(){
@@ -150,13 +194,15 @@ void material(){
 GLuint mybuf = 1;
 void initOGL(int argc, char **argv){
    glutInit(&argc, argv);
-   glutInitDisplayMode(GLUT_RGBA|GLUT_DEPTH|GLUT_DOUBLE);
+   glutInitDisplayMode(GLUT_RGBA|GLUT_DEPTH|GLUT_ACCUM);
    glutInitWindowSize(512,512);
    glutInitWindowPosition(100,50);
    glutCreateWindow("test");
    glClearColor(.35,.35,.35,0);
+   glClearAccum(0.0,0.0,0.0,0.0);
 
    viewVolume();
+   jitter_view();
    lights();
    material();
    
@@ -399,6 +445,7 @@ void set_uniform_parameters(unsigned int p)
 
 
 int main(int argc, char **argv){
+   srandom(123456789);
    string filename= "bunny.obj";
    vector <vec3> vertices2;
    vector <vec2> uvs2;
