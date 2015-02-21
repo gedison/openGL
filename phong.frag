@@ -1,19 +1,26 @@
-uniform vec3 eye_position, light_position_1;
-varying vec3 wc_normal, wc_position;
-
+varying vec3 ec_vnormal, ec_vposition;
 void main(){
    vec3 P, N, L, V, H;
    vec4 diffuse_color = gl_FrontMaterial.diffuse; 
    vec4 specular_color = gl_FrontMaterial.specular; 
    float shininess = gl_FrontMaterial.shininess;
 
-   P = wc_position;
-   N = normalize(wc_normal);
-   L = normalize(light_position_1 - P);
-   V = normalize(eye_position - P);
-   H = normalize(L+V);
-		
-   diffuse_color *= max(dot(N,L),0.0);
-   specular_color *= pow(max(dot(H,N),0.0),shininess);
-   gl_FragColor = diffuse_color + specular_color ; 
+   P = ec_vposition;
+   N = normalize(ec_vnormal);
+   V = normalize(-P);
+
+   vec4 final_color=vec4(0,0,0,1);
+   for(int i=0; i<3; i++){
+      L = normalize(vec3(gl_LightSource[0].position)-P);
+      float lambertTerm = dot(N,L);
+      if (lambertTerm > 0.0){
+         final_color += gl_LightSource[i].diffuse * diffuse_color* lambertTerm;	
+         vec3 N = normalize(ec_vnormal);
+         vec3 H = reflect(-L, N);
+         float specular = pow(max(dot(H, N), 0.0), shininess);
+         final_color += gl_LightSource[i].specular * shininess* specular;
+      }	
+   }gl_FragColor=final_color;
+
+
 }

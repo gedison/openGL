@@ -58,13 +58,6 @@ void viewVolume(){
 
 void draw(){
    glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
-
-/*  
-   glTranslatef(0,0,-cameraDistance);
-   glRotatef(cameraAngleX, 1, 0, 0);
-   glRotatef(cameraAngleY, 0,1, 0);
-*/
-
    glDrawArrays(GL_TRIANGLES,0,sides);
    glutSwapBuffers();
 }
@@ -134,10 +127,11 @@ void lights(){
    glLightfv(GL_LIGHT2,GL_POSITION,back_position);
    glLightfv(GL_LIGHT2,GL_SPOT_DIRECTION,back_direction);
 
-   glEnable(GL_LIGHTING);
+   
+   /*glEnable(GL_LIGHTING);
    glEnable(GL_LIGHT0);
    glEnable(GL_LIGHT1);
-   glEnable(GL_LIGHT2);
+   glEnable(GL_LIGHT2);*/
    
 }
 
@@ -205,7 +199,6 @@ void mouseMotion(int x, int y){
 void keyboard(unsigned char key, int x, int y){
    switch(key){
       case 'q': 
-        //glDeleteBuffers(2, mybuf);
         glDeleteBuffers(1, &mybuf);
         exit(1);
       default: break;  
@@ -349,8 +342,44 @@ unsigned int set_shaders(){
    glShaderSource(f,1,(const char **)&fs,NULL);
    free(vs);
    free(fs); 
+
    glCompileShader(v);
+   GLint shaderCompiled;
+   glGetShaderiv(v, GL_COMPILE_STATUS, &shaderCompiled);
+   if(shaderCompiled == GL_FALSE){
+      cout<<"ShaderCasher.cpp"<<"loadShader(s)"<<"Shader did not compile"<<endl;
+         int infologLength = 0;
+
+         int charsWritten  = 0;
+         char *infoLog;
+         glGetShaderiv(v, GL_INFO_LOG_LENGTH,&infologLength);
+
+         if (infologLength > 0){
+            infoLog = (char *)malloc(infologLength);
+            glGetShaderInfoLog(v, infologLength, &charsWritten, infoLog);
+            string log = infoLog;
+            cout<<log<<endl;
+         }
+   }
+
    glCompileShader(f);
+   glGetShaderiv(f, GL_COMPILE_STATUS, &shaderCompiled);
+   if(shaderCompiled == GL_FALSE){
+      cout<<"ShaderCasher.cpp"<<"loadShader(f)"<<"Shader did not compile"<<endl;
+         int infologLength = 0;
+
+         int charsWritten  = 0;
+         char *infoLog;
+         glGetShaderiv(f, GL_INFO_LOG_LENGTH,&infologLength);
+
+         if (infologLength > 0){
+            infoLog = (char *)malloc(infologLength);
+            glGetShaderInfoLog(f, infologLength, &charsWritten, infoLog);
+            string log = infoLog;
+            cout<<log<<endl;
+         }
+   }
+
    p = glCreateProgram();
    glAttachShader(p,f);
    glAttachShader(p,v);
@@ -394,14 +423,11 @@ int main(int argc, char **argv){
 
    initOGL(argc, argv);
 
-   unsigned int p;
-   p = set_shaders();
-   set_uniform_parameters(p);
-
    glutKeyboardFunc(keyboard);
    glutMouseFunc(mouse);
    glutMotionFunc(mouseMotion);
 
+   set_shaders();
    glutDisplayFunc(draw);
 //   glutIdleFunc(update);
    glutMainLoop();
