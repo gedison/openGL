@@ -74,20 +74,20 @@ float light_position[3]={-3,5,-6};
 
 void lights(){
    float key_ambient[]={0,0,0,0};
-   float key_diffuse[]={1,1,1,0};
-   float key_specular[]={1,1,1,0};
+   float key_diffuse[]={.6,.6,.6,0};
+   float key_specular[]={.2,.2,.2,0};
    float key_position[]={-3,5,6,1};
    float key_direction[]={3,-5,-6,1};
    
    float fill_ambient[]={0,0,0,0};
-   float fill_diffuse[]={.2,.2,.2,0};
+   float fill_diffuse[]={.4,.4,.4,0};
    float fill_specular[]={.2,.2,.2,0};
    float fill_position[]={2,4.5,7.5,1};
    float fill_direction[]={-2,-4.5,-7.5,1};
    
    float back_ambient[]={0,0,0,0};
-   float back_diffuse[]={.5,.5,.5,0};
-   float back_specular[]={.5,.5,.5,0};
+   float back_diffuse[]={.3,.3,.3,0};
+   float back_specular[]={.1,.1,.1,0};
    float back_position[]={0,5,-6.5,1};
    float back_direction[]={-3,-5,-2,1};
 
