@@ -37,7 +37,7 @@ struct point{
    float z;
 };
 
-float eye[3]={0.0,1.0,7.0};
+float eye[3]={0.0,1.0,6.0};
 
 double genRand(){
    return (((double)(random()+1))/2147483649.);
@@ -67,10 +67,10 @@ void viewVolume(){
    glMatrixMode(GL_PROJECTION);
    glLoadIdentity();
    gluPerspective(60.0, 1.0, 0.01, 1000.0);
+   glMatrixMode(GL_MODELVIEW);
 }
 
 void jitter_view(){
-   glMatrixMode(GL_MODELVIEW);
    glLoadIdentity();
 
    struct point jEye, view, up, vdir, utemp, vtemp;
@@ -100,14 +100,15 @@ void draw(){
       jitter_view();
       glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
       glDrawArrays(GL_TRIANGLES,0,sides);
-      glFlush();
+      //glFlush();
       glAccum(GL_ACCUM, 1.0/(float)(VPASSES));
    }
    glAccum(GL_RETURN, 1.0);
+   glFlush();
 }
 
 void update(){
-   usleep(1000);
+   //usleep(1000);
    glTranslatef(.5,0,.5);
    glRotatef(1.0,0.0,1.0,0.0);
    glTranslatef(-.5,0,-.5);
@@ -476,7 +477,7 @@ int main(int argc, char **argv){
 
    set_shaders();
    glutDisplayFunc(draw);
-//   glutIdleFunc(update);
+   glutIdleFunc(update);
    glutMainLoop();
    return 0;
 }
