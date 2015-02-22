@@ -37,7 +37,7 @@ struct point{
    float z;
 };
 
-float eye[3]={0.0,1.0,6.0};
+float eye[3]={0.0,3.0,6.0};
 
 double genRand(){
    return (((double)(random()+1))/2147483649.);
@@ -100,7 +100,6 @@ void draw(){
       jitter_view();
       glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
       glDrawArrays(GL_TRIANGLES,0,sides);
-      //glFlush();
       glAccum(GL_ACCUM, 1.0/(float)(VPASSES));
    }
    glAccum(GL_RETURN, 1.0);
@@ -115,26 +114,28 @@ void update(){
    glutPostRedisplay();
 }
 
-float light_position[3]={-3,5,-6};
-
 void lights(){
+   const float diff1 = .5;
+   const float spec1 = .5;
+   const float diff2 = .2;
+   const float spec2 = .2;
+   const float diff3 = .2;
+   const float spec3 = .2;
+
    float key_ambient[]={0,0,0,0};
-   float key_diffuse[]={.6,.6,.6,0};
-   float key_specular[]={.2,.2,.2,0};
-   float key_position[]={-3,5,6,1};
-   float key_direction[]={3,-5,-6,1};
+   float key_diffuse[]={diff1,diff1,diff1,0};
+   float key_specular[]={spec1,spec1,spec1,0};
+   float key_position[]={-3,4,7.5,1};
    
    float fill_ambient[]={0,0,0,0};
-   float fill_diffuse[]={.4,.4,.4,0};
-   float fill_specular[]={.2,.2,.2,0};
-   float fill_position[]={2,4.5,7.5,1};
-   float fill_direction[]={-2,-4.5,-7.5,1};
+   float fill_diffuse[]={diff2,diff2,diff2,0};
+   float fill_specular[]={spec2,spec2,spec2,0};
+   float fill_position[]={3.5,1,6.5,1};
    
    float back_ambient[]={0,0,0,0};
-   float back_diffuse[]={.3,.3,.3,0};
-   float back_specular[]={.1,.1,.1,0};
+   float back_diffuse[]={diff3,diff3,diff3,0};
+   float back_specular[]={spec3,spec3,spec3,0};
    float back_position[]={0,5,-6.5,1};
-   float back_direction[]={-3,-5,-2,1};
 
    glLightModelfv(GL_LIGHT_MODEL_AMBIENT,key_ambient);
    glLightModeli(GL_LIGHT_MODEL_LOCAL_VIEWER,1);
@@ -148,7 +149,6 @@ void lights(){
    glLightf(GL_LIGHT0,GL_LINEAR_ATTENUATION, .1);
    glLightf(GL_LIGHT0,GL_QUADRATIC_ATTENUATION, .01);
    glLightfv(GL_LIGHT0,GL_POSITION,key_position);
-   glLightfv(GL_LIGHT0,GL_SPOT_DIRECTION,key_direction);
    
    glLightfv(GL_LIGHT1,GL_AMBIENT,fill_ambient);
    glLightfv(GL_LIGHT1,GL_DIFFUSE,fill_diffuse);
@@ -159,7 +159,6 @@ void lights(){
    glLightf(GL_LIGHT1,GL_LINEAR_ATTENUATION, .1);
    glLightf(GL_LIGHT1,GL_QUADRATIC_ATTENUATION, .01);
    glLightfv(GL_LIGHT1,GL_POSITION,fill_position);
-   glLightfv(GL_LIGHT1,GL_SPOT_DIRECTION,fill_direction);
    
    glLightfv(GL_LIGHT2,GL_AMBIENT,back_ambient);
    glLightfv(GL_LIGHT2,GL_DIFFUSE,back_diffuse);
@@ -170,21 +169,14 @@ void lights(){
    glLightf(GL_LIGHT2,GL_LINEAR_ATTENUATION, .1);
    glLightf(GL_LIGHT2,GL_QUADRATIC_ATTENUATION, .01);
    glLightfv(GL_LIGHT2,GL_POSITION,back_position);
-   glLightfv(GL_LIGHT2,GL_SPOT_DIRECTION,back_direction);
-
-   
-   /*glEnable(GL_LIGHTING);
-   glEnable(GL_LIGHT0);
-   glEnable(GL_LIGHT1);
-   glEnable(GL_LIGHT2);*/
    
 }
 
 void material(){
-   float mat_ambient[]={0,0,0,1};
-   float mat_diffuse[]={.9,.2,.2,1};
-   float mat_specular[] = {1,1,1,1};
-   float mat_shininess[]={2.5};
+   float mat_ambient[]={.2,0,0,1};
+   float mat_diffuse[]={1,.2,.2,1};
+   float mat_specular[] = {.5,.5,.5,1};
+   float mat_shininess[]={1.0};
 
    glMaterialfv(GL_FRONT, GL_AMBIENT, mat_ambient);
    glMaterialfv(GL_FRONT, GL_DIFFUSE, mat_diffuse);
@@ -440,8 +432,6 @@ void set_uniform_parameters(unsigned int p)
    int location;
    location = glGetUniformLocation(p,"eye_position");
    glUniform3fv(location,1,eye);
-   location = glGetUniformLocation(p,"light_position_1");
-   glUniform3fv(location,1,light_position);
 }
 
 
@@ -477,7 +467,6 @@ int main(int argc, char **argv){
 
    set_shaders();
    glutDisplayFunc(draw);
-   glutIdleFunc(update);
    glutMainLoop();
    return 0;
 }
