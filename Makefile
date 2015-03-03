@@ -22,7 +22,7 @@ LDFLAGS = $(OPENGL_LIB) $(OIIO_LIB)
 CFLAGS = -g $(OIIO_INC)
 
 #this will be the name of your executable
-PROJECT = test
+PROJECT = bunny
 
 #list a .o file for each .cpp file that you will compile
 #this makefile will compile each cpp separately before linking
