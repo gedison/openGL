@@ -37,8 +37,38 @@ struct point{
    float z;
 };
 
-float eye[3]={0.0,3.0,6.0};
+class vec2{
+public:
+   vec2() : x(0), y(0) {}
+   vec2(const double inx, const double iny) : x(inx), y(iny) {}
+   vec2(const vec2& in) : x(in.x), y(in.y) {}
+   vec2& operator=(const vec2& in){
+      if(this == &in) return *this;
+      x = in.x;
+      y = in.y;
+      return *this;
+   }
+   double x, y;
+};
 
+class vec3{
+public:
+   vec3() : x(0), y(0), z(0) {}
+   vec3(const double inx, const double iny, const double inz) : x(inx), y(iny), z(inz) {}
+   vec3(const vec3& in) : x(in.x), y(in.y), z(in.z) {}
+   vec3& operator=(const vec3& in){
+      if(this == &in) return *this;
+      x = in.x;
+      y = in.y;
+      z = in.z;
+      return *this;
+   }
+   double x, y, z;
+};
+
+float eye[3]={0,3.0,5.0};
+
+//for anti-aliasing
 double genRand(){
    return (((double)(random()+1))/2147483649.);
 }
@@ -70,6 +100,7 @@ void viewVolume(){
    glMatrixMode(GL_MODELVIEW);
 }
 
+//jitter view for anti-aliasing
 void jitter_view(){
    glLoadIdentity();
 
@@ -85,13 +116,6 @@ void jitter_view(){
 
    gluLookAt(jEye.x,jEye.y,jEye.z,view.x,view.y,view.z,up.x,up.y,up.z);
 }
-/*
-void draw(){
-   glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
-   glDrawArrays(GL_TRIANGLES,0,sides);
-   glutSwapBuffers();
-}
-*/
 
 void draw(){
    int view_pass;
@@ -106,14 +130,7 @@ void draw(){
    glFlush();
 }
 
-void update(){
-   //usleep(1000);
-   glTranslatef(.5,0,.5);
-   glRotatef(1.0,0.0,1.0,0.0);
-   glTranslatef(-.5,0,-.5);
-   glutPostRedisplay();
-}
-
+//3 point lighting
 void lights(){
    const float diff1 = .5;
    const float spec1 = .5;
@@ -169,10 +186,10 @@ void lights(){
    glLightf(GL_LIGHT2,GL_LINEAR_ATTENUATION, .1);
    glLightf(GL_LIGHT2,GL_QUADRATIC_ATTENUATION, .01);
    glLightfv(GL_LIGHT2,GL_POSITION,back_position);
-   
 }
 
 void material(){
+   //make our bunny a nice shade of pink
    float mat_ambient[]={.2,0,0,1};
    float mat_diffuse[]={1,.2,.2,1};
    float mat_specular[] = {.5,.5,.5,1};
@@ -199,6 +216,7 @@ void initOGL(int argc, char **argv){
    lights();
    material();
    
+   //buffer stuff for VBO
    glBindBuffer(GL_ARRAY_BUFFER, mybuf);
    glBufferData(GL_ARRAY_BUFFER, sizeof(VBObuff), VBObuff, GL_STATIC_DRAW);
    glVertexPointer(3, GL_FLOAT, 3*sizeof(GLfloat), NULL+0);
@@ -209,32 +227,6 @@ void initOGL(int argc, char **argv){
    glEnableClientState(GL_NORMAL_ARRAY);
 }
 
-void mouse(int button, int state, int x, int y){
-   mouseX=x; mouseY=y;
-   bool isDown=false;
-   if(state == GLUT_DOWN)isDown=true;
-   if(button == GLUT_LEFT_BUTTON){
-      mouseLeftDown=isDown;
-   }else if(button == GLUT_RIGHT_BUTTON){
-      mouseRightDown=isDown;
-   }else if(button == GLUT_MIDDLE_BUTTON){
-      mouseMiddleDown=isDown;
-   }
-}
-
-void mouseMotion(int x, int y){
-   if(mouseLeftDown){
-      cameraAngleY+=(x-mouseX);
-      cameraAngleX+=(y-mouseY);
-      mouseX=x;
-      mouseY=y;
-   }
-   if(mouseRightDown){
-      cameraDistance -=(y-mouseY)*.2f;
-      mouseY=y;
-   }
-}
-
 void keyboard(unsigned char key, int x, int y){
    switch(key){
       case 'q': 
@@ -243,40 +235,6 @@ void keyboard(unsigned char key, int x, int y){
       default: break;  
    }
 }
-
-void timer(int millisec){
-   glutTimerFunc(millisec, timer, millisec);
-   glutPostRedisplay();
-}
-
-class vec2{
-public:
-   vec2() : x(0), y(0) {}
-   vec2(const double inx, const double iny) : x(inx), y(iny) {}
-   vec2(const vec2& in) : x(in.x), y(in.y) {}
-   vec2& operator=(const vec2& in){
-      if(this == &in) return *this;
-      x = in.x;
-      y = in.y;
-      return *this;
-   }
-   double x, y;
-};
-
-class vec3{
-public:
-   vec3() : x(0), y(0), z(0) {}
-   vec3(const double inx, const double iny, const double inz) : x(inx), y(iny), z(inz) {}
-   vec3(const vec3& in) : x(in.x), y(in.y), z(in.z) {}
-   vec3& operator=(const vec3& in){
-      if(this == &in) return *this;
-      x = in.x;
-      y = in.y;
-      z = in.z;
-      return *this;
-   }
-   double x, y, z;
-};
 
 bool loadObj(string filename,
              vector <vec3> &vertices,
@@ -300,19 +258,16 @@ bool loadObj(string filename,
          vec3 vertex;
          ifs >> vertex.x >> vertex.y >> vertex.z;
          temp_vertices.push_back(vertex);
-         //std::cout << "vert " << vertex << std::endl;
       }
       else if(lineIn.compare("vt") == 0){
          vec2 uv;
          ifs >> uv.x >> uv.y;
          temp_uvs.push_back(uv);
-         //std::cout << "uv " << uv << std::endl;
       }
       else if(lineIn.compare("vn") == 0){
          vec3 normal;
          ifs >> normal.x >> normal.y >> normal.z;
          temp_normals.push_back(normal);
-         //std::cout << "normal " << normal << std::endl;
       }
       //scan vertex//normal
       else if(lineIn.compare("f") == 0){
@@ -352,7 +307,7 @@ bool loadObj(string filename,
    return 1;
 }
 
-char *read_shader_program(char *filename) 
+char *read_shader_program(const char *filename) 
 {
    FILE *fp;
    char *content = NULL;
@@ -446,6 +401,7 @@ int main(int argc, char **argv){
       return 0;
    }
 
+   //fill buffer
    for(unsigned int i = 0; i<vertices2.size(); i++){
       VBObuff[(i*3)]=vertices2[i].x;
       VBObuff[(i*3)+1]=vertices2[i].y;
@@ -461,9 +417,8 @@ int main(int argc, char **argv){
 
    initOGL(argc, argv);
 
+   //quit function
    glutKeyboardFunc(keyboard);
-   glutMouseFunc(mouse);
-   glutMotionFunc(mouseMotion);
 
    set_shaders();
    glutDisplayFunc(draw);
